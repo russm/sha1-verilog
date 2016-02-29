@@ -1,5 +1,7 @@
 module testbed;
 
+integer ticks;
+
 reg clk;
 reg start;
 wire [159:0] context_initial = {32'h67452301, 32'hEFCDAB89, 32'h98BADCFE, 32'h10325476, 32'hC3D2E1F0};
@@ -19,6 +21,7 @@ wire [511:0] block = {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012",
 sha1_block sha1_block (.clk(clk), .start(start), .context_in(context_initial), .block(block), .done(done), .context_out(context_out));
 
 initial begin
+  ticks = 0;
   $display("starting");
   $display("block:%h", block);
   tick;
@@ -40,13 +43,14 @@ begin
   clk = 1;
   #1;
   clk = 0;
+  ticks = ticks + 1;
   dumpstate;
 end
 endtask
 
 task dumpstate;
 begin
-  $display("%b %b %h", start, done, context_out);
+  $display("%d %b %b %h", ticks, start, done, context_out);
 //  $display("a:%h b:%h c:%h d:%h e:%h f:%h k:%h w:%h",
 //    sha1_block.a,
 //    sha1_block.b,

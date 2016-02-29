@@ -1,5 +1,7 @@
 module testbed;
 
+integer ticks;
+
 reg clk, start;
 wire hash, match, done;
 wire [159:0] context_initial = {32'h67452301, 32'hEFCDAB89, 32'h98BADCFE, 32'h10325476, 32'hC3D2E1F0};
@@ -29,6 +31,7 @@ sha1_guesser #(.NONCE_SIZE(16)) sha1_guesser (
 
 initial
 begin
+  ticks = 0;
   $display("starting");
   // $display("block:%h", block);
   tick;
@@ -51,6 +54,7 @@ begin
   clk = 1;
   #1;
   clk = 0;
+  ticks = ticks + 1;
   dumpstate;
 end
 endtask
@@ -58,7 +62,7 @@ endtask
 task dumpstate;
 begin
   if (match) begin
-    $display("%b %b %b %h %h", start, match, done, nonce, context_out);
+    $display("%d %b %b %b %h %h", ticks, start, match, done, nonce, context_out);
   end
 //  $display("%b %b %h", start, done, context_out);
 //  $display("a:%h b:%h c:%h d:%h e:%h f:%h k:%h w:%h",
