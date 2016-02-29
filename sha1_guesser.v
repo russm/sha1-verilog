@@ -11,39 +11,37 @@ module sha1_guesser #(
 	output wire hash,
 	output wire match,
 	output reg done,
-	output reg [NONCE_SIZE-1:0] nonce,
+	output wire [NONCE_SIZE-1:0] nonce,
 	output wire [511:0] block_out,
 	output wire [159:0] context_out);
 
-wire [511:0] block = {block_in[511:NONCE_START+1], nonce, block_in[NONCE_START-NONCE_SIZE:0]};
+wire [511:0] block = {block_in[511:NONCE_START+1], this_nonce, block_in[NONCE_START-NONCE_SIZE:0]};
 assign block_out = block;
 assign hash = sha1_done;
 assign match = sha1_done & ((context_out & target_mask) == target);
 
-wire sha1_almost_start = start | sha1_done;
-reg sha1_start;
+wire sha1_start = start | sha1_done;
 wire sha1_done;
 
 wire [NONCE_SIZE-1:0] zero_nonce = {1'b0};
+reg [NONCE_SIZE-1:0] this_nonce;
+reg [NONCE_SIZE-1:0] last_nonce;
+assign nonce = last_nonce;
 
 sha1_block sha1_block (.clk(clk), .start(sha1_start), .context_in(context_in), .block(block), .done(sha1_done), .context_out(context_out));
 
 always @(posedge clk)
 begin
     if (start) begin
-	    nonce <= 0;
+	    this_nonce <= 0;
 		done <= 0;
 	end else if (sha1_done) begin
-		if (~nonce == zero_nonce) begin
+		if (~this_nonce == zero_nonce) begin
 		    done <= 1;
 		end else begin
-	        nonce <= nonce + 1;
+	        this_nonce <= this_nonce + 1;
+			last_nonce <= this_nonce;
 		end
-	end
-	if (sha1_almost_start) begin
-	    sha1_start <= 1;
-	end else begin
-	    sha1_start <= 0;
 	end
 end
 
