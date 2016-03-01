@@ -39,7 +39,7 @@ begin
 		if (~this_nonce == zero_nonce) begin
 		    done <= 1;
 		end else begin
-	        this_nonce <= this_nonce + 1;
+	        this_nonce <= (this_nonce + 1) % 2**NONCE_SIZE;
 			last_nonce <= this_nonce;
 		end
 	end

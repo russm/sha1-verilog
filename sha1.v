@@ -49,7 +49,7 @@ begin
 	    round <= 0;
 		context <= context_in;
 	end else begin
-	    round <= round + 1;
+	    round <= (round + 1) % 128;
 		context <= context_next;
 	end
 end
