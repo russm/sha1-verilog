@@ -23,7 +23,6 @@ assign match = sha1_done & ((context_out & target_mask) == target);
 wire sha1_start = start | sha1_done;
 wire sha1_done;
 
-wire [NONCE_SIZE-1:0] zero_nonce = {1'b0};
 reg [NONCE_SIZE-1:0] this_nonce;
 reg [NONCE_SIZE-1:0] last_nonce;
 assign nonce = last_nonce;
@@ -36,7 +35,7 @@ begin
 	    this_nonce <= 0;
 		done <= 0;
 	end else if (sha1_done) begin
-		if (~this_nonce == zero_nonce) begin
+		if (&this_nonce) begin // if this_nonce is all ones, we'll roll over on the next round
 		    done <= 1;
 		end else begin
 	        this_nonce <= (this_nonce + 1) % 2**NONCE_SIZE;
