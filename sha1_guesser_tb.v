@@ -16,18 +16,18 @@ wire [159:0] target_mask = { 160'hFF };
 
 
 sha1_guesser #(.NONCE_SIZE(16)) sha1_guesser (
-	.clk(clk),
-	.start(start),
-	.context_in(context_initial),
-	.block_in(block),
-	.target(target),
-	.target_mask(target_mask),
-	.hash(hash),
-	.match(match),
-	.done(done),
-	.nonce(nonce),
-	.block_out(block_out),
-	.context_out(context_out));
+    .clk(clk),
+    .start(start),
+    .context_in(context_initial),
+    .block_in(block),
+    .target(target),
+    .target_mask(target_mask),
+    .hash(hash),
+    .match(match),
+    .done(done),
+    .nonce(nonce),
+    .block_out(block_out),
+    .context_out(context_out));
 
 initial
 begin

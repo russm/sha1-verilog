@@ -2,12 +2,12 @@
 
 // process a SHA1 block
 module sha1_block (
-	input wire clk,
-	input wire start,
-	input wire [159:0] context_in,
-	input wire [511:0] block,
-	output wire done,
-	output wire [159:0] context_out);
+    input wire clk,
+    input wire start,
+    input wire [159:0] context_in,
+    input wire [511:0] block,
+    output wire done,
+    output wire [159:0] context_out);
 
 reg [6:0] round;
 reg [159:0] context;
@@ -31,12 +31,12 @@ wire [31:0] e = context[31:0];
 wire [31:0] w;
 wire [31:0] k = (round <= 19) ? 32'h5A827999 :
                 (round <= 39) ? 32'h6ED9EBA1 :
-				(round <= 59) ? 32'h8F1BBCDC :
-				                32'hCA62C1D6;
+                (round <= 59) ? 32'h8F1BBCDC :
+                                32'hCA62C1D6;
 wire [31:0] f = (round <= 19) ? ((b & c) | (~b & d)) :
                 (round <= 39) ? (b ^ c ^ d) :
-				(round <= 59) ? ((b & c) | (b & d) | (c & d)) :
-				                (b ^ c ^ d);
+                (round <= 59) ? ((b & c) | (b & d) | (c & d)) :
+                                (b ^ c ^ d);
 
 assign context_out = {h0+a, h1+b, h2+c, h3+d, h4+e};
 
@@ -46,12 +46,12 @@ sha1_round sha1_round (.context_in(context), .w(w), .k(k), .f(f), .context_out(c
 always @(posedge clk)
 begin
     if (start) begin
-	    round <= 0;
-		context <= context_in;
-	end else begin
-	    round <= (round + 1) % 128;
-		context <= context_next;
-	end
+        round <= 0;
+        context <= context_in;
+    end else begin
+        round <= (round + 1) % 128;
+        context <= context_next;
+    end
 end
 
 endmodule
@@ -59,10 +59,10 @@ endmodule
 
 // generate w values
 module w_machine (
-	input wire clk,
-	input wire load,
-	input wire [511:0] block,
-	output wire [31:0] w);
+    input wire clk,
+    input wire load,
+    input wire [511:0] block,
+    output wire [31:0] w);
 
 reg [511:0] state;
 assign w = state[511:480];
@@ -76,10 +76,10 @@ wire [31:0] w_next = {w_temp[30:0], w_temp[31]};
 always @(posedge clk)
 begin
     if (load)
-	    state <= block;
-	else begin
-	    state <= {state[479:0], w_next};
-	end
+        state <= block;
+    else begin
+        state <= {state[479:0], w_next};
+    end
 end
 
 endmodule
@@ -87,11 +87,11 @@ endmodule
 
 // combinatorial part of a plain SHA1 round
 module sha1_round (
-	input wire [159:0] context_in,
-	input wire [31:0] w,
-	input wire [31:0] k,
-	input wire [31:0] f,
-	output wire [159:0] context_out);
+    input wire [159:0] context_in,
+    input wire [31:0] w,
+    input wire [31:0] k,
+    input wire [31:0] f,
+    output wire [159:0] context_out);
 
 wire [31:0] a_in = context_in[159:128];
 wire [31:0] b_in = context_in[127:96];
