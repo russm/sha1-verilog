@@ -33,24 +33,43 @@ wire [31:0] k = (round <= 19) ? 32'h5A827999 :
                 (round <= 39) ? 32'h6ED9EBA1 :
                 (round <= 59) ? 32'h8F1BBCDC :
                                 32'hCA62C1D6;
-wire [31:0] f = (round <= 19) ? ((b & c) | (~b & d)) :
-                (round <= 39) ? (b ^ c ^ d) :
-                (round <= 59) ? ((b & c) | (b & d) | (c & d)) :
-                                (b ^ c ^ d);
+
+reg [31:0] f;
+wire [31:0] f_zero = ((b & c) | (~b & d));
+wire [31:0] f_next_20;
+wire [31:0] f_next_40;
+wire [31:0] f_next_60;
+wire [31:0] f_next_80;
 
 assign context_out = {h0+a, h1+b, h2+c, h3+d, h4+e};
 
 w_machine w_machine (.clk(clk), .load(start), .block(block), .w(w));
-sha1_round sha1_round (.context_in(context), .w(w), .k(k), .f(f), .context_out(context_next));
+sha1_round sha1_round (
+    .context_in(context),
+    .w(w), .k(k), .f(f),
+    .context_out(context_next),
+    .f_next_20(f_next_20),
+    .f_next_40(f_next_40),
+    .f_next_60(f_next_60),
+    .f_next_80(f_next_80));
 
 always @(posedge clk)
 begin
     if (start) begin
         round <= 0;
         context <= context_in;
+        f <= f_zero;
     end else begin
         round <= (round + 1) % 128;
         context <= context_next;
+        if (round+1 <= 19) // set up *next* round's f
+            f <= f_next_20;
+        else if (round+1 <= 39)
+            f <= f_next_40;
+        else if (round+1 <= 59)
+            f <= f_next_60;
+        else
+            f <= f_next_80;
     end
 end
 
@@ -91,7 +110,11 @@ module sha1_round (
     input wire [31:0] w,
     input wire [31:0] k,
     input wire [31:0] f,
-    output wire [159:0] context_out);
+    output wire [159:0] context_out,
+    output wire [31:0] f_next_20,
+    output wire [31:0] f_next_40,
+    output wire [31:0] f_next_60,
+    output wire [31:0] f_next_80);
 
 wire [31:0] a_in = context_in[159:128];
 wire [31:0] b_in = context_in[127:96];
@@ -104,6 +127,11 @@ wire [31:0] b_out = a_in;
 wire [31:0] c_out = {b_in[1:0],b_in[31:2]};
 wire [31:0] d_out = c_in;
 wire [31:0] e_out = d_in;
+
+assign f_next_20 = ((b_out & c_out) | (~b_out & d_out));
+assign f_next_40 = (b_out ^ c_out ^ d_out);
+assign f_next_60 = ((b_out & c_out) | (b_out & d_out) | (c_out & d_out));
+assign f_next_80 = (b_out ^ c_out ^ d_out);
 
 assign context_out = {a_out, b_out, c_out, d_out, e_out};
 
