@@ -9,13 +9,13 @@ wire done;
 wire [159:0] context_out;
 
 // zero-length data
-//wire [511:0] block = {8'h80, 504'h0};
+wire [511:0] block = {8'h80, 504'h0};
 
 // string "abc"
 //wire [511:0] block = {"abc", 8'h80, 416'd0, 64'd24}; // length in *bits*
 
 // 55-character string (largest 1-block hash)
-wire [511:0] block = {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012", 8'h80, 64'd440}; // length in *bits*
+//wire [511:0] block = {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012", 8'h80, 64'd440}; // length in *bits*
 
 
 sha1_block sha1_block (.clk(clk), .start(start), .context_in(context_initial), .block(block), .done(done), .context_out(context_out));
@@ -30,9 +30,15 @@ initial begin
   tick;
   tick;
   start = 1'b0;
-  repeat (81) begin
+  repeat (80) begin
     tick;
   end
+  $display("h0:%h h1:%h h2:%h h3:%h h4:%h",
+    context_out[159:128],
+    context_out[127:96],
+    context_out[95:64],
+    context_out[63:32],
+    context_out[31:0]);
   $display("done");
   $finish;
 end
@@ -50,16 +56,16 @@ endtask
 
 task dumpstate;
 begin
-  $display("%d %b %b %h", ticks, start, done, context_out);
-//  $display("a:%h b:%h c:%h d:%h e:%h f:%h k:%h w:%h",
-//    sha1_block.a,
-//    sha1_block.b,
-//    sha1_block.c,
-//    sha1_block.d,
-//    sha1_block.e,
-//    sha1_block.f,
-//    sha1_block.k,
-//    sha1_block.w);
+//  $display("%d %b %b %h", ticks, start, done, context_out);
+  $display("a:%h b:%h c:%h d:%h e:%h f:%h k:%h w:%h",
+    sha1_block.a,
+    sha1_block.b,
+    sha1_block.c,
+    sha1_block.d,
+    sha1_block.e,
+    sha1_block.f,
+    sha1_block.k,
+    sha1_block.w);
 end
 endtask
 
